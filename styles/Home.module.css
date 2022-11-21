@@ -112,6 +112,10 @@
   margin-left: 0.5rem;
 }
 
+.playerIcon {
+  /* height: 10em; */
+}
+
 @media (max-width: 600px) {
   .grid {
     width: 100%;

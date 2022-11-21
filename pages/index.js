@@ -1,48 +1,155 @@
 import Head from 'next/head'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import Accordion from 'react-bootstrap/Accordion';
+var Timer = require('timer-machine');
+
+const TimePlayer = ({ tasks, setTasks, keyID }) => {
+  const [pause, setPause] = useState(false)
+
+  const handlePauseClick = () => {
+    setPause(!pause)
+  }
+
+  useEffect(() => {
+
+  }, [])
+
+  return (
+    <>
+      {
+        pause ?
+          <svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handlePauseClick} viewBox="0 0 16 16">
+            <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z" />
+          </svg> :
+          <svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handlePauseClick} className="bi bi-play player-icon" viewBox="0 0 16 16">
+            <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
+          </svg>
+
+      }
+    </>
+  );
+}
+
+const Notes = ({ keyID, tasks, setTasks }) => {
+  const [newNote, setNewNote] = useState(['']);
+  const [error, setError] = useState(false);
+
+  const handleNoteInput = (event) => {
+    let value = event.target.value;
+    setNewNote([value])
+  }
+
+  const handleNoteSubmit = (event) => {
+    event.preventDefault();
+    if (newNote[0] === '') {
+      setError(true)
+      setTimeout(() => {
+        setError(false)
+      }, 3000)
+    } else {
+      tasks[keyID].notes.push(newNote)
+      setNewNote([''])
+    }
+  }
+
+  return (
+    <div>
+      <div>
+        <h2>Notes:</h2>
+        <ul>
+          {
+            tasks[keyID].notes.map((i, index) => {
+              return (<li key={index}>{i[0]}</li>)
+
+            })
+          }
+        </ul>
+
+      </div>
+
+      <form onSubmit={handleNoteSubmit}>
+        <input type='text' name={keyID} value={newNote[0]} onChange={handleNoteInput} />
+        <input type='submit' value='ADD NOTE' />
+      </form>
+      {
+        error ? 'Field cannot be left blank' : ''
+      }
+    </div>
+  )
+}
 
 export default function Home() {
-  const [tasks, setTasks] = useState(['No Tasks']);
-  const [newTask, setNewTask] = useState({
-    newTask: ''
-  })
 
+  const [tasks, setTasks] = useState({});
+
+  const [newTask, setNewTask] = useState({
+    taskID: null,
+    task: '',
+    notes: [],
+  });
+
+  const [error, setError] = useState(false);
+
+  // ADD TASK
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (tasks[0] === 'No Tasks') {
-      setTasks([newTask.newTask])
-      setNewTask({
-        newTask: ''
-      })
+
+    if (newTask.task === '') {
+      setError(true)
+      setTimeout(() => {
+        setError(false)
+      }, 3000)
     } else {
-      setTasks([...tasks, newTask.newTask])
+      setTasks({ ...tasks, [newTask.taskID]: newTask })
       setNewTask({
-        newTask: ''
+        taskID: null,
+        task: '',
+        notes: [],
       })
     }
   }
 
+  // HANDLE TASK INPUT
   const handleInput = (event) => {
     let name = event.target.name;
     let value = event.target.value;
+    let ID = Object.keys(tasks).length + 1;
+    const taskTimer = new Timer();
 
-    setNewTask({ [name]: value })
+    setNewTask({
+      taskID: ID,
+      task: value,
+      notes: [],
+    })
   }
 
-  const timePlayer = (
-    <>
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pause" viewBox="0 0 16 16">
-  <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z"/>
-</svg>
+  // DISPLAY TASKS FUNCTION
+  const displayTasks = () => {
+    if (Object.keys(tasks).length == 0) {
+      return (<p>No Tasks</p>)
+    } else {
+      return (
+        Object.keys(tasks).map((key, index) => {
+          return (
+            <Accordion.Item key={index} eventKey={index}>
+              <Accordion.Header>
+                {tasks[key].task}
+              </Accordion.Header>
+              <Accordion.Body>
 
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play" viewBox="0 0 16 16">
-  <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"/>
-</svg>
-</>
-  )
+                <TimePlayer tasks={tasks} setTasks={setTasks} keyID={key} />
+
+                <Notes keyID={key} tasks={tasks} setTasks={setTasks} />
+
+              </Accordion.Body>
+            </Accordion.Item>
+          )
+        })
+      )
+    }
+  }
 
   return (
     <div className={styles.container}>
@@ -57,34 +164,16 @@ export default function Home() {
         <div>
           <h1>TASKS</h1>
           <form onSubmit={handleSubmit}>
-            <input name='newTask' type='text' onChange={handleInput} value={newTask.newTask} />
+            <input name='newTask' type='text' onChange={handleInput} value={newTask.task} />
             <input type='submit' value='ADD TASK' />
           </form>
+          {
+            error ? 'Field cannot be left blank' : ''
+          }
           <Accordion>
-            {
-              tasks.map((i, index) => {
-                if(i === 'No Tasks') {
-                  return (
-                  <p>{i}</p>
-                  )
-                } else {
-                return (
-                  <Accordion.Item eventKey={index}>
-                    <Accordion.Header>{i}</Accordion.Header>
-                    <Accordion.Body>
-                    
-                    {timePlayer}
-                    
-                    <form>
-                      <input type='text' />
-                      <input type='submit' value='ADD NOTE' />
-                    </form>
-                    </Accordion.Body>
-                  </Accordion.Item>
-                )
-                }
-              })
-            }
+
+            {displayTasks()}
+
           </Accordion>
         </div>
 
