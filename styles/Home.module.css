@@ -1,5 +1,9 @@
 .container {
   padding: 0 2rem;
+  background-image: linear-gradient(to bottom, #051937, #04224e, #082a66, #15337e, #273a96);
+  color: white;
+
+  text-align: center;
 }
 
 .main {
