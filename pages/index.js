@@ -17,7 +17,7 @@ const TimePlayer = ({ tasks, setTasks, keyID }) => {
   const handleStartTimer = () => {
     countRef.current = setInterval(()=>{
       setTimer((time) => time + 1)
-    }, 500)
+    }, 1000)
     setInitialStart(false);
     setPause(true);
   }
@@ -49,7 +49,7 @@ const TimePlayer = ({ tasks, setTasks, keyID }) => {
   }
 
   return (
-    <>
+    <div>
     {/* {time} */}
     {formatTime()}
 
@@ -71,7 +71,7 @@ const TimePlayer = ({ tasks, setTasks, keyID }) => {
             <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z" />
           </svg>
       }
-    </>
+    </div>
   );
 }
 
@@ -99,8 +99,10 @@ const Notes = ({ keyID, tasks, setTasks }) => {
 
   return (
     <div>
-      <div>
+      <div className={styles.notesHeader}>
         <h2>Notes:</h2>
+        <TimePlayer tasks={tasks} setTasks={setTasks} keyID={keyID} />
+      </div>
         <ul>
           {
             tasks[keyID].notes.map((i, index) => {
@@ -110,11 +112,9 @@ const Notes = ({ keyID, tasks, setTasks }) => {
           }
         </ul>
 
-      </div>
-
-      <form onSubmit={handleNoteSubmit}>
+      <form className={styles.notesForm} onSubmit={handleNoteSubmit}>
         <input className={styles.noteInput} type='text' name={keyID} value={newNote[0]} onChange={handleNoteInput} />
-        <input className={styles.taskFormBtn} type='submit' value='ADD NOTE' />
+        <input className={`${styles.formBtn} ${styles.notesBtn}`} type='submit' value='ADD' />
       </form>
       {
         error ? <span className={styles.errorSpan}>Field cannot be left blank</span> : ''
@@ -181,9 +181,7 @@ export default function Home() {
                 {tasks[key].task}
               </Accordion.Header>
               <Accordion.Body>
-
-                <TimePlayer tasks={tasks} setTasks={setTasks} keyID={key} />
-
+                
                 <Notes keyID={key} tasks={tasks} setTasks={setTasks} />
 
               </Accordion.Body>
@@ -205,13 +203,16 @@ export default function Home() {
       <main className={styles.main}>
 
           <h1>TASK MANAGER</h1>
+          
           <form onSubmit={handleSubmit} className={styles.taskForm}>
             <input className={styles.taskFormInput} name='newTask' type='text' onChange={handleInput} value={newTask.task} autoComplete='off' />
-            <input className={styles.taskFormBtn} type='submit' value='ADD TASK' />
+            <input className={styles.formBtn} type='submit' value='ADD TASK' />
           </form>
+          
           {
-            error ? <span className={styles.errorSpan}>Field cannot be left blank</span> : ''
+            error ? <div><span className={styles.errorSpan}>Field cannot be left blank</span></div> : ''
           }
+          
           <Accordion className={styles.tasksContainer}>
 
             {displayTasks()}

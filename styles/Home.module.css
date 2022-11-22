@@ -7,15 +7,13 @@
 
 .main {
   min-height: 100vh;
+  max-height: 100vh;
   padding: 4rem 0;
-  /* flex: 1; */
-  /* display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center; */
+
 
   display: grid;
-  grid-template-rows: repeat(4, 10%);
+  grid-template-rows: repeat(4, min-content);
+  row-gap: 1em;
 }
 
 .taskForm {
@@ -48,12 +46,21 @@
   outline: none;
 }
 
-.taskFormBtn {
+.formBtn {
   background-color: #0F3460;
   color: white;
   border: 1px solid white;
   padding: 0.5em;
+  padding-left: 1em;
+  padding-right: 1em;
   border-radius: 10px;
+  width: fit-content;
+}
+
+.formBtn:hover {
+  background-color: white;
+  color: #0F3460;
+  border: 1px solid #0F3460;
 }
 
 .errorSpan {
@@ -61,16 +68,14 @@
 }
 
 .tasksContainer {
+  max-height: 575px;
+  overflow-y: scroll;
   min-width: 40%;
-  justify-self: center;
-}
-
-.taskHeader {
-  /* background-color: red; */
+  justify-self: center; 
 }
 
 .taskItem {
-  background-color: #2FA4FF;
+  background-color: #0f69ab;
   color: white;
 }
 
@@ -79,11 +84,32 @@
   border-radius: 24px;
   padding-left: 1em;
   padding-right: 1em;
+  border: 1px solid white;
+  /* background-color: transparent; */
 }
 
 .noteInput:focus {
   outline: none;
   border: 1px solid white;
+}
+
+.notesHeader {
+  display: grid;
+  grid-template-columns: 50% 50%;
+}
+
+.notesHeader h2 {
+  text-align: left;
+}
+
+.notesForm {
+  display: grid;
+  grid-template-columns: 80% 20%;
+  /* column-gap: 1em; */
+}
+
+.notesBtn {
+  justify-self: center;
 }
 
 @media (max-width: 600px) {
