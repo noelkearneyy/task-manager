@@ -1,32 +1,75 @@
 import Head from 'next/head'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import Accordion from 'react-bootstrap/Accordion';
 var Timer = require('timer-machine');
 
 const TimePlayer = ({ tasks, setTasks, keyID }) => {
-  const [pause, setPause] = useState(false)
+  const [initialStart, setInitialStart] = useState(true);
+  const [start, setStart] = useState(false)
+  const [pause, setPause] = useState(false);
+  const [active, setActive] = useState(false);
+  const [time, setTimer] = useState(0);
+  const countRef = useRef(null);
 
-  const handlePauseClick = () => {
-    setPause(!pause)
+  // START TIMER
+  const handleStartTimer = () => {
+    countRef.current = setInterval(()=>{
+      setTimer((time) => time + 1)
+    }, 500)
+    setInitialStart(false);
+    setPause(true);
   }
 
-  useEffect(() => {
+  // PAUSE TIMER
+  const handlePauseTimer = (event) => {
+    setPause(!pause)
+    setStart(!start)
 
-  }, [])
+    clearInterval(countRef.current)
+  }
+
+  // RESUME TIMER
+  const handleResumeTimer = (event) => {
+    setPause(!pause)
+    setStart(!start)
+  countRef.current = setInterval(() => {
+    setTimer((timer) => timer + 1)
+  }, 1000)
+  }
+
+  const formatTime = () => {
+    const getSeconds = `0${(time % 60)}`.slice(-2)
+    const minutes = `${Math.floor(time / 60)}`
+    const getMinutes = `0${minutes % 60}`.slice(-2)
+    const getHours = `0${Math.floor(time / 3600)}`.slice(-2)
+
+    return `${getHours} : ${getMinutes} : ${getSeconds}`
+  }
 
   return (
     <>
-      {
-        pause ?
-          <svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handlePauseClick} viewBox="0 0 16 16">
-            <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z" />
-          </svg> :
-          <svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handlePauseClick} className="bi bi-play player-icon" viewBox="0 0 16 16">
-            <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
-          </svg>
+    {/* {time} */}
+    {formatTime()}
 
+    {
+      initialStart && 
+      <svg id='play' xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handleStartTimer} className="bi bi-play player-icon" viewBox="0 0 16 16">
+      <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
+    </svg>
+    } 
+    {
+      start &&
+      <svg id='play' xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handleResumeTimer} className="bi bi-play player-icon" viewBox="0 0 16 16">
+      <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
+    </svg>
+    }
+      {
+        pause &&
+          <svg id='pause' xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handlePauseTimer} viewBox="0 0 16 16">
+            <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z" />
+          </svg>
       }
     </>
   );
@@ -70,11 +113,11 @@ const Notes = ({ keyID, tasks, setTasks }) => {
       </div>
 
       <form onSubmit={handleNoteSubmit}>
-        <input type='text' name={keyID} value={newNote[0]} onChange={handleNoteInput} />
-        <input type='submit' value='ADD NOTE' />
+        <input className={styles.noteInput} type='text' name={keyID} value={newNote[0]} onChange={handleNoteInput} />
+        <input className={styles.taskFormBtn} type='submit' value='ADD NOTE' />
       </form>
       {
-        error ? 'Field cannot be left blank' : ''
+        error ? <span className={styles.errorSpan}>Field cannot be left blank</span> : ''
       }
     </div>
   )
@@ -128,13 +171,13 @@ export default function Home() {
   // DISPLAY TASKS FUNCTION
   const displayTasks = () => {
     if (Object.keys(tasks).length == 0) {
-      return (<p>No Tasks</p>)
+      return (<p>NO TASKS</p>)
     } else {
       return (
         Object.keys(tasks).map((key, index) => {
           return (
-            <Accordion.Item key={index} eventKey={index}>
-              <Accordion.Header>
+            <Accordion.Item key={index} eventKey={index} className={styles.taskItem}>
+              <Accordion.Header className={styles.taskHeader}>
                 {tasks[key].task}
               </Accordion.Header>
               <Accordion.Body>
@@ -161,21 +204,19 @@ export default function Home() {
 
       <main className={styles.main}>
 
-        <div>
-          <h1>TASKS</h1>
-          <form onSubmit={handleSubmit}>
-            <input name='newTask' type='text' onChange={handleInput} value={newTask.task} />
-            <input type='submit' value='ADD TASK' />
+          <h1>TASK MANAGER</h1>
+          <form onSubmit={handleSubmit} className={styles.taskForm}>
+            <input className={styles.taskFormInput} name='newTask' type='text' onChange={handleInput} value={newTask.task} autoComplete='off' />
+            <input className={styles.taskFormBtn} type='submit' value='ADD TASK' />
           </form>
           {
-            error ? 'Field cannot be left blank' : ''
+            error ? <span className={styles.errorSpan}>Field cannot be left blank</span> : ''
           }
-          <Accordion>
+          <Accordion className={styles.tasksContainer}>
 
             {displayTasks()}
 
           </Accordion>
-        </div>
 
       </main>
 
