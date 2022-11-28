@@ -3,19 +3,24 @@ import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import Accordion from 'react-bootstrap/Accordion';
-var Timer = require('timer-machine');
+import CloseButton from 'react-bootstrap/CloseButton';
+import _default from 'react-bootstrap/Accordion';
+// var Timer = require('timer-machine');
+var _ = require('lodash');
+import { v4 as uuidv4 } from 'uuid';
 
-const TimePlayer = ({ tasks, setTasks, keyID }) => {
+const TimePlayer = ({ tasks, setTasks, keyID, complete }) => {
   const [initialStart, setInitialStart] = useState(true);
   const [start, setStart] = useState(false)
   const [pause, setPause] = useState(false);
-  const [active, setActive] = useState(false);
   const [time, setTimer] = useState(0);
+
   const countRef = useRef(null);
+  const completedReset = useRef(0)
 
   // START TIMER
   const handleStartTimer = () => {
-    countRef.current = setInterval(()=>{
+    countRef.current = setInterval(() => {
       setTimer((time) => time + 1)
     }, 1000)
     setInitialStart(false);
@@ -34,9 +39,10 @@ const TimePlayer = ({ tasks, setTasks, keyID }) => {
   const handleResumeTimer = (event) => {
     setPause(!pause)
     setStart(!start)
-  countRef.current = setInterval(() => {
-    setTimer((timer) => timer + 1)
-  }, 1000)
+
+    countRef.current = setInterval(() => {
+      setTimer((timer) => timer + 1)
+    }, 1000)
   }
 
   const formatTime = () => {
@@ -48,36 +54,56 @@ const TimePlayer = ({ tasks, setTasks, keyID }) => {
     return `${getHours} : ${getMinutes} : ${getSeconds}`
   }
 
-  return (
-    <div>
-    {/* {time} */}
-    {formatTime()}
+  useEffect(() => {
+    if (tasks[keyID].complete === true) {
+      setInitialStart(false)
+      setStart(false)
+      setPause(false)
 
-    {
-      initialStart && 
-      <svg id='play' xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handleStartTimer} className="bi bi-play player-icon" viewBox="0 0 16 16">
-      <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
-    </svg>
-    } 
-    {
-      start &&
-      <svg id='play' xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handleResumeTimer} className="bi bi-play player-icon" viewBox="0 0 16 16">
-      <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
-    </svg>
+      clearInterval(countRef.current)
+    } else if (tasks[keyID].complete === false && tasks[keyID].completed === true) {
+      setPause(true)
+      countRef.current = setInterval(() => {
+        setTimer((timer) => timer + 1)
+      }, 1000)
     }
-      {
-        pause &&
-          <svg id='pause' xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handlePauseTimer} viewBox="0 0 16 16">
+  }, [tasks[keyID].complete])
+
+  return (
+    <div className={styles.timerContainer}>
+
+      <div className={styles.time}>
+        {formatTime()}
+      </div>
+
+      {/* <div> */}
+        {
+          initialStart &&
+          <svg id='play' xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handleStartTimer} className={`${'bi bi-play player-icon'} ${styles.biIcon}`} viewBox="0 0 16 16">
+            <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
+          </svg>
+        }
+        {
+          start &&
+          <svg id='play' xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handleResumeTimer} className={`${'bi bi-play player-icon'} ${styles.biIcon}`}  viewBox="0 0 16 16">
+            <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
+          </svg>
+        }
+        {
+          pause &&
+          <svg id='pause' xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handlePauseTimer} className={`${styles.biIcon}`}  viewBox="0 0 16 16">
             <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z" />
           </svg>
-      }
+        }
+      {/* </div> */}
     </div>
   );
 }
 
-const Notes = ({ keyID, tasks, setTasks }) => {
+const Notes = ({ keyID, tasks, setTasks, complete }) => {
   const [newNote, setNewNote] = useState(['']);
   const [error, setError] = useState(false);
+  const [deleteBtn, setDeleteBtn] = useState(false);
 
   const handleNoteInput = (event) => {
     let value = event.target.value;
@@ -97,31 +123,129 @@ const Notes = ({ keyID, tasks, setTasks }) => {
     }
   }
 
+  const handleCompleteTask = (event) => {
+    if (event.target.classList.contains(`${styles.completeBtnAcitoned}`)) {
+      // CHANGE CIRCLE COLOR TO GREEN FOR COMPLETE
+      event.target.classList.remove(`${styles.completeBtnAcitoned}`)
+
+      // UPDATE TASKS STATE FOR COMPLETE TO FALSE
+      setTasks({
+        ...tasks,
+        [keyID]: {
+          ...tasks[keyID],
+          complete: false,
+        }
+      })
+
+
+    } else if (!event.target.classList.contains(`${styles.completeBtnAcitoned}`)) {
+      // CHANGE CIRCLE COLOR TO WHITE FOR INCOMPLETE
+      event.target.classList.add(`${styles.completeBtnAcitoned}`)
+
+      // UPDATE TASKS STATE FOR COMPLETE TO TRUE
+      setTasks({
+        ...tasks,
+        [keyID]: {
+          ...tasks[keyID],
+          complete: true,
+          completed: true,
+        }
+      })
+
+    }
+  }
+
+
+
+  const deleteTaskWarning = (warning) => {
+    setDeleteBtn(!deleteBtn)
+  }
+
+  const handleDeleteTask = () => {
+    setTasks(_.omit(tasks, keyID))
+    setDeleteBtn(false)
+  }
+
+  const binTaskSVG = (
+    <svg onClick={deleteTaskWarning} xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" className={`${'bi bi-trash'} ${styles.biIcon}`} viewBox="0 0 16 16">
+      <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
+      <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
+    </svg>
+  )
+
   return (
-    <div>
+    <div className={styles.taskAccordionContents}>
+    <div id={'task-notes-'+keyID} className={styles.taskNotesContainer}>
+     
       <div className={styles.notesHeader}>
         <h2>Notes:</h2>
-        <TimePlayer tasks={tasks} setTasks={setTasks} keyID={keyID} />
+        <div className={styles.taskBtnsContainer}>
+
+          <TimePlayer tasks={tasks} setTasks={setTasks} keyID={keyID} complete={complete} />
+          
+          { deleteBtn ? <CloseButton onClick={deleteTaskWarning}/> : binTaskSVG }
+          
+          <button className={styles.completeBtn} onClick={handleCompleteTask}></button>
+       
+        </div>
       </div>
-        <ul>
+        
+        <ul className={styles.notesList}>
           {
             tasks[keyID].notes.map((i, index) => {
-              return (<li key={index}>{i[0]}</li>)
-
+              return (
+                <>
+                  <div className={styles.notesContainer}>
+                    <li id={keyID} className={styles.note} key={i}>
+                      {i}
+                    </li>
+                    <BinNoteSVG keyID={keyID} noteID={index} tasks={tasks} setTasks={setTasks} />
+                  </div>
+                  <hr />
+                </>
+              )
             })
           }
+
         </ul>
 
       <form className={styles.notesForm} onSubmit={handleNoteSubmit}>
-        <input className={styles.noteInput} type='text' name={keyID} value={newNote[0]} onChange={handleNoteInput} />
+        <input autoComplete='off' className={styles.noteInput} type='text' name={keyID} value={newNote[0]} onChange={handleNoteInput} />
         <input className={`${styles.formBtn} ${styles.notesBtn}`} type='submit' value='ADD' />
       </form>
       {
-        error ? <span className={styles.errorSpan}>Field cannot be left blank</span> : ''
+        error ? <span className={`${styles.errorSpan} ${styles.notesError}`}>Field cannot be left blank</span> : null
       }
+    </div>
+  {deleteBtn && <button onClick={handleDeleteTask} className={styles.deleteTaskBtn}>DELETE</button> }
+   
     </div>
   )
 }
+
+const BinNoteSVG = ({keyID, noteID, tasks, setTasks}) => {
+
+  const deleteNote = () => {
+    let currentNotes = tasks[keyID].notes;
+    currentNotes.splice(noteID, 1);
+
+    setTasks({
+      ...tasks, 
+      [keyID]: {
+        ...tasks[keyID],
+        notes: currentNotes,
+      }
+    })
+  }
+
+  return (
+    <svg onClick={deleteNote} xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" className={`${'bi bi-trash'} ${styles.biIcon} ${styles.binNoteIcon}`} viewBox="0 0 16 16">
+      <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
+      <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
+    </svg>
+  )
+}
+
 
 export default function Home() {
 
@@ -131,6 +255,8 @@ export default function Home() {
     taskID: null,
     task: '',
     notes: [],
+    time: null,
+    complete: false,
   });
 
   const [error, setError] = useState(false);
@@ -145,26 +271,32 @@ export default function Home() {
         setError(false)
       }, 3000)
     } else {
-      setTasks({ ...tasks, [newTask.taskID]: newTask })
+      
+      
+      // setNewTask({...newTask, taskID: UUID})
+      setTasks({...tasks, [newTask.taskID]: newTask })
+      console.log(tasks)
       setNewTask({
         taskID: null,
         task: '',
         notes: [],
+        time: null,
+        complete: false,
       })
     }
   }
 
   // HANDLE TASK INPUT
   const handleInput = (event) => {
-    let name = event.target.name;
     let value = event.target.value;
-    let ID = Object.keys(tasks).length + 1;
-    const taskTimer = new Timer();
+    let UUID = uuidv4();
 
     setNewTask({
-      taskID: ID,
+      taskID: UUID,
       task: value,
       notes: [],
+      time: null,
+      complete: false,
     })
   }
 
@@ -174,19 +306,35 @@ export default function Home() {
       return (<p>NO TASKS</p>)
     } else {
       return (
-        Object.keys(tasks).map((key, index) => {
-          return (
-            <Accordion.Item key={index} eventKey={index} className={styles.taskItem}>
-              <Accordion.Header className={styles.taskHeader}>
-                {tasks[key].task}
-              </Accordion.Header>
-              <Accordion.Body>
-                
-                <Notes keyID={key} tasks={tasks} setTasks={setTasks} />
+        Object.keys(tasks).reverse().map((key, index) => {
+          if (tasks[key].complete === true) {
+            return (
+              <Accordion.Item key={key} eventKey={key} className={styles.taskItem}>
+                <Accordion.Header className={`${styles.taskHeader} ${styles.taskHeaderCompleted}`}>
+                  {tasks[key].task}
 
-              </Accordion.Body>
-            </Accordion.Item>
-          )
+                </Accordion.Header>
+                <Accordion.Body className={styles.accordionBody}>
+
+                  <Notes keyID={key} tasks={tasks} setTasks={setTasks} complete={tasks[key].complete} />
+
+                </Accordion.Body>
+              </Accordion.Item>
+            )
+          } else {
+            return (
+              <Accordion.Item key={key} eventKey={key} className={styles.taskItem}>
+                <Accordion.Header className={styles.taskHeader}>
+                  {tasks[key].task}
+                </Accordion.Header>
+                <Accordion.Body className={styles.accordionBody}>
+
+                  <Notes keyID={key} tasks={tasks} setTasks={setTasks} />
+
+                </Accordion.Body>
+              </Accordion.Item>
+            )
+          }
         })
       )
     }
@@ -201,26 +349,26 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
+ 
+        <h1>TASK MANAGER</h1>
 
-          <h1>TASK MANAGER</h1>
-          
-          <form onSubmit={handleSubmit} className={styles.taskForm}>
-            <input className={styles.taskFormInput} name='newTask' type='text' onChange={handleInput} value={newTask.task} autoComplete='off' />
-            <input className={styles.formBtn} type='submit' value='ADD TASK' />
-          </form>
-          
-          {
-            error ? <div><span className={styles.errorSpan}>Field cannot be left blank</span></div> : ''
-          }
-          
-          <Accordion className={styles.tasksContainer}>
+        <form onSubmit={handleSubmit} className={styles.taskForm}>
+          <input className={styles.taskFormInput} name='newTask' type='text' onChange={handleInput} value={newTask.task} autoComplete='off' />
+          <input className={styles.formBtn} type='submit' value='ADD TASK' />
+        </form>
 
-            {displayTasks()}
+        {
+          error ? <div><span className={styles.errorSpan}>Field cannot be left blank</span></div> : ''
+        }
 
-          </Accordion>
+        <Accordion className={styles.tasksContainer}>
+
+          {displayTasks()}
+
+        </Accordion>
 
       </main>
-
+      
     </div>
   )
 }

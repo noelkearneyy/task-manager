@@ -1,5 +1,4 @@
 .container {
-  /* padding: 0 2rem; */
   background-image: linear-gradient(to bottom, #051937, #04224e, #082a66, #15337e, #273a96);
   color: white;
   text-align: center;
@@ -9,7 +8,6 @@
   min-height: 100vh;
   max-height: 100vh;
   padding: 4rem 0;
-
 
   display: grid;
   grid-template-rows: repeat(4, min-content);
@@ -21,7 +19,6 @@
   height: 100%;
   display: grid;
   grid-auto-flow: column;
-  /* grid-template-columns: repeat(2, auto); */
   column-gap: 1em;
 
   justify-content: center;
@@ -35,12 +32,6 @@
   border-bottom: 1px solid white;
   color: white;
 }
-
-/* .taskFormInput:hover {
-  -webkit-box-shadow:0px 2px 1px white;
- -moz-box-shadow:0px 2px 1px white;
- box-shadow:0px 2px 1px white;
-} */
 
 .taskFormInput:focus {
   outline: none;
@@ -64,19 +55,71 @@
 }
 
 .errorSpan {
-  background-color: red;
+  background-color: #8b0000;
+  padding: 0.5em;
+  padding-left: 2em;
+  padding-right: 2em;
+  border-radius: 24px;
+  max-width: 50%;
+
 }
 
 .tasksContainer {
   max-height: 575px;
   overflow-y: scroll;
   min-width: 40%;
+  max-width: 40%;
   justify-self: center; 
 }
 
+.taskHeaderCompleted {
+  text-decoration: line-through;
+  text-decoration-color: black;
+  text-decoration-thickness: 0.07em;
+}
+
 .taskItem {
-  background-color: #0f69ab;
+  /* background-color: #0f69ab; */
+  background-color: #8b0000;
   color: white;
+}
+
+.taskAccordionContents {
+  display: grid;
+  grid-auto-flow: column;
+
+  overflow: hidden;
+}
+
+.deleteTaskBtn {
+  border: 10px solid pink;
+ -webkit-transform: rotate(-90deg);
+ -moz-transform: rotate(-90deg);
+ -o-transform: rotate(-90deg);
+ -ms-transform: rotate(-90deg);
+ /* transform: rotate(-90deg); */
+ 
+ background-color: #8b0000;
+ border: none;
+ color: white;
+ font-weight: bold;
+ letter-spacing: 0.5em;
+ padding: 0;
+ height: min-content;
+ align-self: center;
+}
+
+.taskNotesContainer {
+  background-color: #0f69ab;
+  margin: 0;
+  padding: 1em;
+
+  display: grid;
+}
+
+.accordion-body {
+  background-color: pink;
+  padding: 0;
 }
 
 .noteInput {
@@ -85,17 +128,23 @@
   padding-left: 1em;
   padding-right: 1em;
   border: 1px solid white;
-  /* background-color: transparent; */
+  color: white;
+  background-color: #0f69ab;
+}
+
+.noteInput:hover {
+  background-color: #2489d6;
 }
 
 .noteInput:focus {
   outline: none;
   border: 1px solid white;
+  background-color: #2489d6;
 }
 
 .notesHeader {
   display: grid;
-  grid-template-columns: 50% 50%;
+  grid-template-columns: 30% 70%;
 }
 
 .notesHeader h2 {
@@ -110,6 +159,91 @@
 
 .notesBtn {
   justify-self: center;
+}
+
+.notesList {
+  max-height: 15em;
+  overflow-y: scroll;
+  margin-right: 6%;
+  margin-top: 1em;
+}
+
+.notesContainer {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: 90% 10%;
+  max-width: 100%;
+}
+
+.note {
+  text-align: left;
+  max-width: 100%;
+  max-height: 100%;
+  overflow-x: scroll;
+}
+
+.notesContainer:hover .binNoteIcon {
+  opacity: 1;
+}
+
+.notesContainer:nth-child(2) {
+  position: relative;
+  right: 0;
+}
+
+.binNoteIcon {
+  opacity: 0;
+  align-self: center;
+}
+
+.notesError {
+  margin-top: 1em;
+  justify-self: center;
+}
+
+.taskBtnsContainer {
+  display: grid;
+  grid-auto-flow: column;
+  justify-content: right;
+  align-items: center;
+  column-gap: 1em;
+}
+
+.accordionBody {
+  padding: 0;
+}
+
+.completeBtn {
+  display: inline-block;
+  border-radius: 50%;
+  height: 30px;
+  width: 30px;
+  background-color: white;
+  border: none;
+  padding: 0;
+}
+
+.biIcon {
+  cursor: pointer;
+}
+
+.completeBtnAcitoned {
+  border: 2px solid white;
+  background-color: green;
+}
+
+.timerContainer {
+  display: grid;
+  grid-auto-flow: column;
+  /* grid-template-columns: 70% 30%; */
+  align-items: center;
+}
+
+.time {
+  /* padding-right: 0.5em; */
+  /* padding-left: 0.5em; */
+  /* padding-right: 0.5em; */
+  /* display: inline-block; */
 }
 
 @media (max-width: 600px) {
