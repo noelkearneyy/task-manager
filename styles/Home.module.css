@@ -61,7 +61,10 @@
   padding-right: 2em;
   border-radius: 24px;
   max-width: 50%;
+}
 
+.closeBtn {
+  cursor: pointer;
 }
 
 .tasksContainer {
@@ -76,6 +79,12 @@
   text-decoration: line-through;
   text-decoration-color: black;
   text-decoration-thickness: 0.07em;
+}
+
+.noteHeaderCompleted {
+  text-decoration: line-through;
+  text-decoration-color: white;
+  text-decoration-thickness: 0.15em;
 }
 
 .taskItem {
@@ -145,6 +154,13 @@
 .notesHeader {
   display: grid;
   grid-template-columns: 30% 70%;
+  align-items: center;
+}
+
+.notesTitle {
+  padding: 0;
+  margin: 0;
+  align-self: center;
 }
 
 .notesHeader h2 {
@@ -171,8 +187,18 @@
 .notesContainer {
   display: grid;
   grid-auto-flow: column;
-  grid-template-columns: 90% 10%;
+  grid-template-columns: 85% 15%;
   max-width: 100%;
+}
+
+.noteBtnsContainer {
+  display: grid;
+  grid-auto-flow: column;
+}
+
+.noteCompleteBtn {
+  align-self: center;
+  opacity: 0;
 }
 
 .note {
@@ -182,7 +208,7 @@
   overflow-x: scroll;
 }
 
-.notesContainer:hover .binNoteIcon {
+.notesContainer:hover .binNoteIcon, .notesContainer:hover .noteCompleteBtn {
   opacity: 1;
 }
 

@@ -16,7 +16,6 @@ const TimePlayer = ({ tasks, setTasks, keyID, complete }) => {
   const [time, setTimer] = useState(0);
 
   const countRef = useRef(null);
-  const completedReset = useRef(0)
 
   // START TIMER
   const handleStartTimer = () => {
@@ -72,54 +71,71 @@ const TimePlayer = ({ tasks, setTasks, keyID, complete }) => {
   return (
     <div className={styles.timerContainer}>
 
-      <div className={styles.time}>
+      <div id={`${'timer' + keyID}`} className={styles.time}>
         {formatTime()}
       </div>
 
-      {/* <div> */}
-        {
-          initialStart &&
-          <svg id='play' xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handleStartTimer} className={`${'bi bi-play player-icon'} ${styles.biIcon}`} viewBox="0 0 16 16">
-            <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
-          </svg>
-        }
-        {
-          start &&
-          <svg id='play' xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handleResumeTimer} className={`${'bi bi-play player-icon'} ${styles.biIcon}`}  viewBox="0 0 16 16">
-            <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
-          </svg>
-        }
-        {
-          pause &&
-          <svg id='pause' xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handlePauseTimer} className={`${styles.biIcon}`}  viewBox="0 0 16 16">
-            <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z" />
-          </svg>
-        }
-      {/* </div> */}
+      {
+        initialStart &&
+        <svg id='play' xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handleStartTimer} className={`${'bi bi-play player-icon'} ${styles.biIcon}`} viewBox="0 0 16 16">
+          <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
+        </svg>
+      }
+      {
+        start &&
+        <svg id='play' xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handleResumeTimer} className={`${'bi bi-play player-icon'} ${styles.biIcon}`} viewBox="0 0 16 16">
+          <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
+        </svg>
+      }
+      {
+        pause &&
+        <svg id='pause' xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handlePauseTimer} className={`${styles.biIcon}`} viewBox="0 0 16 16">
+          <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z" />
+        </svg>
+      }
     </div>
   );
 }
 
 const Notes = ({ keyID, tasks, setTasks, complete }) => {
-  const [newNote, setNewNote] = useState(['']);
+  const [newNote, setNewNote] = useState({
+    note: '',
+    completed: false, 
+  });
   const [error, setError] = useState(false);
   const [deleteBtn, setDeleteBtn] = useState(false);
 
   const handleNoteInput = (event) => {
     let value = event.target.value;
-    setNewNote([value])
+    setNewNote({
+      note: value,
+      completed: false,
+    })
   }
 
   const handleNoteSubmit = (event) => {
     event.preventDefault();
-    if (newNote[0] === '') {
+    let UUID = uuidv4();
+    if (newNote.note === '') {
       setError(true)
       setTimeout(() => {
         setError(false)
       }, 3000)
     } else {
-      tasks[keyID].notes.push(newNote)
-      setNewNote([''])
+      setTasks({
+        ...tasks,
+        [keyID]: {
+          ...tasks[keyID],
+          notes: {
+            ...tasks[keyID].notes,
+            [UUID]: newNote,
+          }
+        }
+      })
+      // tasks[keyID].notes.push(newNote)
+      setNewNote({
+        note: '',
+      })
     }
   }
 
@@ -151,11 +167,8 @@ const Notes = ({ keyID, tasks, setTasks, complete }) => {
           completed: true,
         }
       })
-
     }
   }
-
-
 
   const deleteTaskWarning = (warning) => {
     setDeleteBtn(!deleteBtn)
@@ -164,6 +177,41 @@ const Notes = ({ keyID, tasks, setTasks, complete }) => {
   const handleDeleteTask = () => {
     setTasks(_.omit(tasks, keyID))
     setDeleteBtn(false)
+  }
+
+  const handleCompleteNote = (event) => {
+    let id = event.target.id;
+    let completedNote = ('note-' + id)
+    let note = document.getElementById(completedNote)
+    let noteCompleteBtn = document.getElementById(id)
+
+    if (noteCompleteBtn.classList.contains(`${styles.completeBtnAcitoned}`)) {
+      
+      setTasks({...tasks, 
+        [keyID]: {
+          ...tasks[keyID],
+        notes: {
+          ...tasks[keyID].notes,
+          [id]: {
+            ...tasks[keyID].notes[id],
+            completed: false,
+          }
+        }}
+        })
+    } else if(!noteCompleteBtn.classList.contains(`${styles.completeBtnAcitoned}`)) {
+      
+      setTasks({...tasks, 
+        [keyID]: {
+          ...tasks[keyID],
+        notes: {
+          ...tasks[keyID].notes,
+          [id]: {
+            ...tasks[keyID].notes[id],
+            completed: true,
+          }
+        }}
+        })
+    }
   }
 
   const binTaskSVG = (
@@ -175,65 +223,94 @@ const Notes = ({ keyID, tasks, setTasks, complete }) => {
 
   return (
     <div className={styles.taskAccordionContents}>
-    <div id={'task-notes-'+keyID} className={styles.taskNotesContainer}>
-     
-      <div className={styles.notesHeader}>
-        <h2>Notes:</h2>
-        <div className={styles.taskBtnsContainer}>
+      <div id={'task-notes-' + keyID} className={styles.taskNotesContainer}>
 
-          <TimePlayer tasks={tasks} setTasks={setTasks} keyID={keyID} complete={complete} />
-          
-          { deleteBtn ? <CloseButton onClick={deleteTaskWarning}/> : binTaskSVG }
-          
-          <button className={styles.completeBtn} onClick={handleCompleteTask}></button>
-       
+        <div className={styles.notesHeader}>
+          <h2 className={styles.notesTitle}>Notes:</h2>
+          <div className={styles.taskBtnsContainer}>
+
+            <TimePlayer tasks={tasks} setTasks={setTasks} keyID={keyID} complete={complete} />
+
+            {
+              deleteBtn ?
+                <svg className={styles.closeBtn} onClick={deleteTaskWarning} xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="white" viewBox="0 0 16 16">
+                  <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" />
+                </svg>
+                :
+                binTaskSVG
+            }
+
+            <button className={styles.completeBtn} onClick={handleCompleteTask}></button>
+
+          </div>
         </div>
-      </div>
-        
+
         <ul className={styles.notesList}>
           {
-            tasks[keyID].notes.map((i, index) => {
-              return (
-                <>
-                  <div className={styles.notesContainer}>
-                    <li id={keyID} className={styles.note} key={i}>
-                      {i}
-                    </li>
-                    <BinNoteSVG keyID={keyID} noteID={index} tasks={tasks} setTasks={setTasks} />
-                  </div>
-                  <hr />
-                </>
-              )
+            Object.keys(tasks[keyID].notes).reverse().map((key, index) => {
+         
+              if(tasks[keyID].notes[key].completed === true) {
+                return (
+                  <>
+                    <div className={styles.notesContainer} key={key}>
+                      <li id={'note-' + key} className={`${styles.note} ${styles.noteHeaderCompleted}`}>
+                        {tasks[keyID].notes[key].note}
+                      </li>
+                      <div className={styles.noteBtnsContainer}>
+                        <BinNoteSVG keyID={keyID} noteID={key} tasks={tasks} setTasks={setTasks} />
+                        <button id={key} onClick={handleCompleteNote} className={`${styles.completeBtn} ${styles.noteCompleteBtn} ${styles.completeBtnAcitoned}`}></button>
+                      </div>
+                    </div>
+                    <hr />
+                  </>
+                )
+              } else {
+                return (
+                  <>
+                    <div className={styles.notesContainer} key={key}>
+                      <li id={'note-' + key} className={`${styles.note}`}>
+                        {tasks[keyID].notes[key].note}
+                      </li>
+                      <div className={styles.noteBtnsContainer}>
+                        <BinNoteSVG keyID={keyID} noteID={key} tasks={tasks} setTasks={setTasks} />
+                        <button id={key} onClick={handleCompleteNote} className={`${styles.completeBtn} ${styles.noteCompleteBtn}`}></button>
+                      </div>
+                    </div>
+                    <hr />
+                  </>
+                )
+              }
+            
             })
           }
 
         </ul>
 
-      <form className={styles.notesForm} onSubmit={handleNoteSubmit}>
-        <input autoComplete='off' className={styles.noteInput} type='text' name={keyID} value={newNote[0]} onChange={handleNoteInput} />
-        <input className={`${styles.formBtn} ${styles.notesBtn}`} type='submit' value='ADD' />
-      </form>
-      {
-        error ? <span className={`${styles.errorSpan} ${styles.notesError}`}>Field cannot be left blank</span> : null
-      }
-    </div>
-  {deleteBtn && <button onClick={handleDeleteTask} className={styles.deleteTaskBtn}>DELETE</button> }
-   
+        <form className={styles.notesForm} onSubmit={handleNoteSubmit}>
+          <input autoComplete='off' className={styles.noteInput} type='text' name={keyID} value={newNote.note} onChange={handleNoteInput} />
+          <input className={`${styles.formBtn} ${styles.notesBtn}`} type='submit' value='ADD' />
+        </form>
+        {
+          error ? <span className={`${styles.errorSpan} ${styles.notesError}`}>Field cannot be left blank</span> : null
+        }
+      </div>
+      {deleteBtn && <button onClick={handleDeleteTask} className={styles.deleteTaskBtn}>DELETE</button>}
+
     </div>
   )
 }
 
-const BinNoteSVG = ({keyID, noteID, tasks, setTasks}) => {
+const BinNoteSVG = ({ keyID, noteID, tasks, setTasks }) => {
 
   const deleteNote = () => {
     let currentNotes = tasks[keyID].notes;
-    currentNotes.splice(noteID, 1);
+    let updatedNotes = _.omit(currentNotes, noteID)
 
     setTasks({
-      ...tasks, 
+      ...tasks,
       [keyID]: {
         ...tasks[keyID],
-        notes: currentNotes,
+        notes: updatedNotes,
       }
     })
   }
@@ -254,7 +331,7 @@ export default function Home() {
   const [newTask, setNewTask] = useState({
     taskID: null,
     task: '',
-    notes: [],
+    notes: {},
     time: null,
     complete: false,
   });
@@ -271,15 +348,14 @@ export default function Home() {
         setError(false)
       }, 3000)
     } else {
-      
-      
-      // setNewTask({...newTask, taskID: UUID})
-      setTasks({...tasks, [newTask.taskID]: newTask })
-      console.log(tasks)
+
+
+      setTasks({ ...tasks, [newTask.taskID]: newTask })
+
       setNewTask({
         taskID: null,
         task: '',
-        notes: [],
+        notes: {},
         time: null,
         complete: false,
       })
@@ -294,7 +370,7 @@ export default function Home() {
     setNewTask({
       taskID: UUID,
       task: value,
-      notes: [],
+      notes: {},
       time: null,
       complete: false,
     })
@@ -312,7 +388,6 @@ export default function Home() {
               <Accordion.Item key={key} eventKey={key} className={styles.taskItem}>
                 <Accordion.Header className={`${styles.taskHeader} ${styles.taskHeaderCompleted}`}>
                   {tasks[key].task}
-
                 </Accordion.Header>
                 <Accordion.Body className={styles.accordionBody}>
 
@@ -337,7 +412,7 @@ export default function Home() {
           }
         })
       )
-    }
+    } 
   }
 
   return (
@@ -349,7 +424,7 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
- 
+
         <h1>TASK MANAGER</h1>
 
         <form onSubmit={handleSubmit} className={styles.taskForm}>
@@ -368,7 +443,7 @@ export default function Home() {
         </Accordion>
 
       </main>
-      
+
     </div>
   )
 }
