@@ -1,12 +1,11 @@
 import Head from 'next/head'
-import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import Accordion from 'react-bootstrap/Accordion';
-import CloseButton from 'react-bootstrap/CloseButton';
-import _default from 'react-bootstrap/Accordion';
-// var Timer = require('timer-machine');
+// import _default from 'react-bootstrap/Accordion';
+
 var _ = require('lodash');
+import 'animate.css';
 import { v4 as uuidv4 } from 'uuid';
 
 const TimePlayer = ({ tasks, setTasks, keyID, complete }) => {
@@ -170,7 +169,7 @@ const Notes = ({ keyID, tasks, setTasks, complete }) => {
     }
   }
 
-  const deleteTaskWarning = (warning) => {
+  const deleteTaskWarning = () => {
     setDeleteBtn(!deleteBtn)
   }
 
@@ -245,7 +244,7 @@ const Notes = ({ keyID, tasks, setTasks, complete }) => {
           </div>
         </div>
 
-        <ul className={styles.notesList}>
+        <ul className={`${styles.notesList}`}>
           {
             Object.keys(tasks[keyID].notes).reverse().map((key, index) => {
          
@@ -267,7 +266,7 @@ const Notes = ({ keyID, tasks, setTasks, complete }) => {
               } else {
                 return (
                   <>
-                    <div className={styles.notesContainer} key={key}>
+                    <div className={`${'animate__animated animate__fadeIn'} ${styles.notesContainer}` } key={key}>
                       <li id={'note-' + key} className={`${styles.note}`}>
                         {tasks[keyID].notes[key].note}
                       </li>
@@ -291,10 +290,10 @@ const Notes = ({ keyID, tasks, setTasks, complete }) => {
           <input className={`${styles.formBtn} ${styles.notesBtn}`} type='submit' value='ADD' />
         </form>
         {
-          error ? <span className={`${styles.errorSpan} ${styles.notesError}`}>Field cannot be left blank</span> : null
+          error ? <span className={`${'animate__animated animate__shakeX'} ${styles.errorSpan} ${styles.notesError}`}>Field cannot be left blank</span> : null
         }
       </div>
-      {deleteBtn && <button onClick={handleDeleteTask} className={styles.deleteTaskBtn}>DELETE</button>}
+      {deleteBtn && <button onClick={handleDeleteTask} className={`${'animate__animated animate__slideInRight'} ${styles.deleteTaskBtn}`}>DELETE</button>}
 
     </div>
   )
@@ -398,7 +397,7 @@ export default function Home() {
             )
           } else {
             return (
-              <Accordion.Item key={key} eventKey={key} className={styles.taskItem}>
+              <Accordion.Item key={key} eventKey={key} className={`${'animate__animated animate__fadeIn'} ${styles.taskItem}`}>
                 <Accordion.Header className={styles.taskHeader}>
                   {tasks[key].task}
                 </Accordion.Header>
@@ -428,12 +427,12 @@ export default function Home() {
         <h1>TASK MANAGER</h1>
 
         <form onSubmit={handleSubmit} className={styles.taskForm}>
-          <input className={styles.taskFormInput} name='newTask' type='text' onChange={handleInput} value={newTask.task} autoComplete='off' />
+          <input maxLength={40} className={styles.taskFormInput} name='newTask' type='text' onChange={handleInput} value={newTask.task} autoComplete='off' />
           <input className={styles.formBtn} type='submit' value='ADD TASK' />
         </form>
 
         {
-          error ? <div><span className={styles.errorSpan}>Field cannot be left blank</span></div> : ''
+          error ? <div><span className={`${'animate__animated animate__shakeX'} ${styles.errorSpan}`}>Field cannot be left blank</span></div> : ''
         }
 
         <Accordion className={styles.tasksContainer}>
