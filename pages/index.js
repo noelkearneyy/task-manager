@@ -326,6 +326,7 @@ const BinNoteSVG = ({ keyID, noteID, tasks, setTasks }) => {
 export default function Home() {
 
   const [tasks, setTasks] = useState({});
+  const [init, setInit] = useState(0);
 
   const [newTask, setNewTask] = useState({
     taskID: null,
@@ -337,6 +338,7 @@ export default function Home() {
 
   const [error, setError] = useState(false);
 
+
   // ADD TASK
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -347,7 +349,6 @@ export default function Home() {
         setError(false)
       }, 3000)
     } else {
-
 
       setTasks({ ...tasks, [newTask.taskID]: newTask })
 
