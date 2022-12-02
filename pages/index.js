@@ -39,8 +39,8 @@ export default function Home()  {
   const handleInput = (event) => {
     // Value of new task input field
     let value = event.target.value;
-    // Creates a Unique Universal Identifier 
-    let UUID = uuidv4();
+    // Creates a Universally Unique Identifier 
+    const UUID = uuidv4();
 
     // Updates New Task State with UUID and input field value
     setNewTask({
@@ -64,7 +64,7 @@ export default function Home()  {
       }, 3000)
     
     // If input is not an empty string, add the New Task State Object to the Tasks State Object 
-    } else {
+    } else if (newTask.task !== '') {
       setTasks({ ...tasks, [newTask.taskID]: newTask })
 
       // Reset the New Task State Object - deletes the value in the new task form input field
@@ -198,7 +198,7 @@ const Notes = ({ keyID, tasks, setTasks }) => {
 // ----------------------------------------------------------------------------------------------------------------------------------------
 // FUNCTIONS
 // ----------------------------------------------------------------------------------------------------------------------------------------
-  // handleNoteInput - Function (event) - 
+  // handleNoteInput - Function (event) - Updates the New Note State to the value inputted in the note form's input field
   const handleNoteInput = (event) => {
     let value = event.target.value;
     setNewNote({
@@ -207,16 +207,23 @@ const Notes = ({ keyID, tasks, setTasks }) => {
     })
   }
 
-  // handleNoteSubmit - Function (event) - 
+  // handleNoteSubmit - Function (event) - Adds the New Note State to the Task State Object
   const handleNoteSubmit = (event) => {
+    // Restricts submit button event submitting the form and refreshing the page
     event.preventDefault();
-    let UUID = uuidv4();
+    
+    // Creates a Universally Unique Identifier for the new note
+    const UUID = uuidv4();
+
+    // Validate input - if the input is an empty string set Error State to true to display an error message and set to false after 3 seconds 
     if (newNote.note === '') {
-      setError(true)
+      setError(true);
       setTimeout(() => {
         setError(false)
-      }, 3000)
-    } else {
+      }, 3000);
+    
+    // If the input is not an empty string add the note to the corresponding Key in the Tasks Object in a nested object under the Notes Key. The UUID is used as the Key and the Value is the inputted value
+    } else if (newNote.note !== '') {
       setTasks({
         ...tasks,
         [keyID]: {
@@ -226,18 +233,20 @@ const Notes = ({ keyID, tasks, setTasks }) => {
             [UUID]: newNote,
           }
         }
-      })
+      });
+      // Reset the value of the New Note State Object to an empty string to clear the note form's input field
       setNewNote({
         note: '',
-      })
+      });
     }
   }
 
-  // handleCompleteTask - Function (event) - 
+  // handleCompleteTask - Function (event) - Styles the complete task button and task header to display as complete
   const handleCompleteTask = (event) => {
+    // If complete task button contains .completeBtnActioned, remove it from the button's classList and set complete Key of Task Object to false
     if (event.target.classList.contains(`${styles.completeBtnAcitoned}`)) {
       // CHANGE CIRCLE COLOR TO GREEN FOR COMPLETE
-      event.target.classList.remove(`${styles.completeBtnAcitoned}`)
+      event.target.classList.remove(`${styles.completeBtnAcitoned}`);
 
       // UPDATE TASKS STATE FOR COMPLETE TO FALSE
       setTasks({
@@ -246,11 +255,11 @@ const Notes = ({ keyID, tasks, setTasks }) => {
           ...tasks[keyID],
           complete: false,
         }
-      })
-
+      });
+    // If complete task button doesn't contains .completeBtnActioned, add it to the button's classList and set complete Key of Task Object to true
     } else if (!event.target.classList.contains(`${styles.completeBtnAcitoned}`)) {
       // CHANGE CIRCLE COLOR TO WHITE FOR INCOMPLETE
-      event.target.classList.add(`${styles.completeBtnAcitoned}`)
+      event.target.classList.add(`${styles.completeBtnAcitoned}`);
 
       // UPDATE TASKS STATE FOR COMPLETE TO TRUE
       setTasks({
@@ -260,30 +269,32 @@ const Notes = ({ keyID, tasks, setTasks }) => {
           complete: true,
           completed: true,
         }
-      })
+      });
     }
   }
 
-  // deleteTaskWarning - Function - 
+  // deleteTaskWarning - Function - set delete button State to either true or false. If true, the delete task button will be displayed
   const deleteTaskWarning = () => {
-    setDeleteBtn(!deleteBtn)
+    setDeleteBtn(!deleteBtn);
   }
 
-  // handleDeleteTask - Function - 
+  // handleDeleteTask - Function - Delete a Task from the Tasks State Object
   const handleDeleteTask = () => {
+    // Using lodash, the task Key will be removed from the Tasks State Object and set as the new State Object
     setTasks(_.omit(tasks, keyID))
+    // Set delete button state to false to hide the delete button
     setDeleteBtn(false)
   }
 
-  // handleCompleteNote - Function (event) - 
+  // handleCompleteNote - Function (event) - Set the Completed Key of the Notes Object nested in the Tasks State Object to true or false 
   const handleCompleteNote = (event) => {
+    // ID of the note comeplete button - the note UUID Key
     let id = event.target.id;
-    let completedNote = ('note-' + id)
-    let note = document.getElementById(completedNote)
-    let noteCompleteBtn = document.getElementById(id)
+    // Note complete button element
+    let noteCompleteBtn = document.getElementById(id);
 
+    // If the note complete button element's classList contains .completeBtnAction set the Completed Key Value to false
     if (noteCompleteBtn.classList.contains(`${styles.completeBtnAcitoned}`)) {
-      
       setTasks({...tasks, 
         [keyID]: {
           ...tasks[keyID],
@@ -294,9 +305,10 @@ const Notes = ({ keyID, tasks, setTasks }) => {
             completed: false,
           }
         }}
-        })
+      }); 
+    
+    // If the note complete button element's classList doesn't contains .completeBtnAction set the Completed Key Value to true 
     } else if(!noteCompleteBtn.classList.contains(`${styles.completeBtnAcitoned}`)) {
-      
       setTasks({...tasks, 
         [keyID]: {
           ...tasks[keyID],
@@ -307,15 +319,22 @@ const Notes = ({ keyID, tasks, setTasks }) => {
             completed: true,
           }
         }}
-        })
+      })
     }
   }
 
-
+  // Bin SVG - When clicked the delete task button will be displayed
   const binTaskSVG = (
     <svg onClick={deleteTaskWarning} xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" className={`${'bi bi-trash'} ${styles.biIcon}`} viewBox="0 0 16 16">
       <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
       <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
+    </svg>
+  );
+
+  // Cancel SVG - When clicked the delete task button will be hidden
+  const cancelDeleteSVG = (
+    <svg className={styles.closeBtn} onClick={deleteTaskWarning} xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="white" viewBox="0 0 16 16">
+      <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" />
     </svg>
   );
 
@@ -326,35 +345,30 @@ const Notes = ({ keyID, tasks, setTasks }) => {
     <div className={styles.taskAccordionContents}>
       <div id={'task-notes-' + keyID} className={styles.taskNotesContainer}>
 
+        {/* Notes Header - Container note's title and buttons (TimerPlayer, Delete/Cancel Delete button, complete task button) */}
         <div className={styles.notesHeader}>
           <h2 className={styles.notesTitle}>Notes:</h2>
+          
+          {/* Header buttons */}
           <div className={styles.taskBtnsContainer}>
-
+            {/* Child Component - TimePlayer */}
             <TimePlayer tasks={tasks} setTasks={setTasks} keyID={keyID} />
-
-            {
-              deleteBtn ?
-                <svg className={styles.closeBtn} onClick={deleteTaskWarning} xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="white" viewBox="0 0 16 16">
-                  <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" />
-                </svg>
-                :
-                binTaskSVG
-            }
-
+            { deleteBtn ? cancelDeleteSVG : binTaskSVG }
             <button className={styles.completeBtn} onClick={handleCompleteTask}></button>
-
           </div>
+        
         </div>
 
         <ul className={`${styles.notesList}`}>
           {
-            Object.keys(tasks[keyID].notes).reverse().map((key, index) => {
-         
+            // Map over the Keys of the Note Key in the Task State Object
+            Object.keys(tasks[keyID].notes).reverse().map((key) => {
+              // If the Completed Key of the nested Note Object is true return the note with .noteHeaderCompleted in the classList
               if(tasks[keyID].notes[key].completed === true) {
                 return (
                   <>
-                    <div className={styles.notesContainer} key={key}>
-                      <li id={'note-' + key} className={`${styles.note} ${styles.noteHeaderCompleted}`}>
+                    <div className={styles.notesContainer}>
+                      <li id={'note-' + key} className={`${styles.note} ${styles.noteHeaderCompleted}`} key={key}>
                         {tasks[keyID].notes[key].note}
                       </li>
                       <div className={styles.noteBtnsContainer}>
@@ -365,14 +379,16 @@ const Notes = ({ keyID, tasks, setTasks }) => {
                     <hr />
                   </>
                 )
+              // If the Completed Key of the nested Note Object is not true return the note without .noteHeaderCompleted in the classList
               } else {
                 return (
                   <>
-                    <div className={`${'animate__animated animate__fadeIn'} ${styles.notesContainer}` } key={key}>
-                      <li id={'note-' + key} className={`${styles.note}`}>
+                    <div className={`${'animate__animated animate__fadeIn'} ${styles.notesContainer}` }>
+                      <li id={'note-' + key} className={`${styles.note}`} key={key}>
                         {tasks[keyID].notes[key].note}
                       </li>
                       <div className={styles.noteBtnsContainer}>
+                        {/* Child Component - Used to delete a note from the nested object in the Note Key in the Tasks Object */}
                         <BinNoteSVG keyID={keyID} noteID={key} tasks={tasks} setTasks={setTasks} />
                         <button id={key} onClick={handleCompleteNote} className={`${styles.completeBtn} ${styles.noteCompleteBtn}`}></button>
                       </div>
@@ -386,15 +402,17 @@ const Notes = ({ keyID, tasks, setTasks }) => {
           }
 
         </ul>
-
+        {/* Add Note form */}
         <form className={styles.notesForm} onSubmit={handleNoteSubmit}>
           <input autoComplete='off' className={styles.noteInput} type='text' name={keyID} value={newNote.note} onChange={handleNoteInput} />
           <input className={`${styles.formBtn} ${styles.notesBtn}`} type='submit' value='ADD' />
         </form>
+        {/* If the Error State Boolean is true display the error, if false, display null */}
         {
           error ? <span className={`${'animate__animated animate__shakeX'} ${styles.errorSpan} ${styles.notesError}`}>Field cannot be left blank</span> : null
         }
       </div>
+      {/* If the delete button State Boolean is true display the delete task button */}
       {deleteBtn && <button onClick={handleDeleteTask} className={`${'animate__animated animate__slideInRight'} ${styles.deleteTaskBtn}`}>DELETE</button>}
 
     </div>
@@ -406,7 +424,7 @@ const Notes = ({ keyID, tasks, setTasks }) => {
 // ----------------------------------------------------------------------------------------------------------------------------------------
 // BinNoteSVG component's props include;
 // keyID - the key of the related task in the Task State Object
-// noteID - 
+// noteID - the UUID Key of the note which is to be deleted
 // tasks - the Tasks State Object
 // setTasks - the Tasks State Object's setState function
 const BinNoteSVG = ({ keyID, noteID, tasks, setTasks }) => {
@@ -414,10 +432,13 @@ const BinNoteSVG = ({ keyID, noteID, tasks, setTasks }) => {
 // ----------------------------------------------------------------------------------------------------------------------------------------
 // FUNCTIONS
 // ----------------------------------------------------------------------------------------------------------------------------------------
+  // deleteNote - Function - Delete a note from the nested Notes object within the Tasks State Object
   const deleteNote = () => {
-    let currentNotes = tasks[keyID].notes;
-    let updatedNotes = _.omit(currentNotes, noteID)
-
+    // Variable containing nested Notes object
+    const currentNotes = tasks[keyID].notes;
+    // Variable of updated nested Notes object with the specified KeyID removed
+    const updatedNotes = _.omit(currentNotes, noteID)
+    // Updating the Tasks State Object with the updatedNotes variable in the nest Notes Key object
     setTasks({
       ...tasks,
       [keyID]: {
@@ -427,7 +448,11 @@ const BinNoteSVG = ({ keyID, noteID, tasks, setTasks }) => {
     })
   }
 
+// ----------------------------------------------------------------------------------------------------------------------------------------
+// RETURN - JSX
+// ----------------------------------------------------------------------------------------------------------------------------------------
   return (
+    // Bin SVG Icon for deleting a note
     <svg onClick={deleteNote} xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" className={`${'bi bi-trash'} ${styles.biIcon} ${styles.binNoteIcon}`} viewBox="0 0 16 16">
       <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
       <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
@@ -439,12 +464,37 @@ const BinNoteSVG = ({ keyID, noteID, tasks, setTasks }) => {
 // CHILD COMPONENT - TimePlayer
 // ----------------------------------------------------------------------------------------------------------------------------------------
 const TimePlayer = ({ tasks, keyID }) => {
-  const [initialStart, setInitialStart] = useState(true);
+
+// ----------------------------------------------------------------------------------------------------------------------------------------
+// STATE
+// ----------------------------------------------------------------------------------------------------------------------------------------
+ 
+const [initialStart, setInitialStart] = useState(true);
   const [start, setStart] = useState(false)
   const [pause, setPause] = useState(false);
+ 
   const [time, setTimer] = useState(0);
 
   const countRef = useRef(null);
+
+// ----------------------------------------------------------------------------------------------------------------------------------------
+// FUNCTIONS
+// ----------------------------------------------------------------------------------------------------------------------------------------
+  
+  useEffect(() => {
+    if (tasks[keyID].complete === true) {
+      setInitialStart(false)
+      setStart(false)
+      setPause(false)
+
+      clearInterval(countRef.current)
+    } else if (tasks[keyID].complete === false && tasks[keyID].completed === true) {
+      setPause(true)
+      countRef.current = setInterval(() => {
+        setTimer((timer) => timer + 1)
+      }, 1000)
+    }
+  }, [tasks[keyID].complete])
 
   // START TIMER
   const handleStartTimer = () => {
@@ -481,21 +531,6 @@ const TimePlayer = ({ tasks, keyID }) => {
 
     return `${getHours} : ${getMinutes} : ${getSeconds}`
   }
-
-  useEffect(() => {
-    if (tasks[keyID].complete === true) {
-      setInitialStart(false)
-      setStart(false)
-      setPause(false)
-
-      clearInterval(countRef.current)
-    } else if (tasks[keyID].complete === false && tasks[keyID].completed === true) {
-      setPause(true)
-      countRef.current = setInterval(() => {
-        setTimer((timer) => timer + 1)
-      }, 1000)
-    }
-  }, [tasks[keyID].complete])
 
   return (
     <div className={styles.timerContainer}>
