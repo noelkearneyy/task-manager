@@ -468,26 +468,31 @@ const TimePlayer = ({ tasks, keyID }) => {
 // ----------------------------------------------------------------------------------------------------------------------------------------
 // STATE
 // ----------------------------------------------------------------------------------------------------------------------------------------
- 
-const [initialStart, setInitialStart] = useState(true);
+  // Booleans - used to display the intial start, resume start and pause buttons 
+  const [initialStart, setInitialStart] = useState(true);
   const [start, setStart] = useState(false)
   const [pause, setPause] = useState(false);
  
+  // Time State - Int - used to store the recorded time
   const [time, setTimer] = useState(0);
 
+  // useRef is used to store the timer value without it changing on rerender or initiating a rerender
   const countRef = useRef(null);
 
 // ----------------------------------------------------------------------------------------------------------------------------------------
 // FUNCTIONS
 // ----------------------------------------------------------------------------------------------------------------------------------------
-  
+  // useEffect is executed on the initial render and again when there is a change to the dependancy array (tasks[keyID].complete)
   useEffect(() => {
+    // If the Complete key within the Tasks State Object is true, the time player buttons are removed and the timer is paused
     if (tasks[keyID].complete === true) {
       setInitialStart(false)
       setStart(false)
       setPause(false)
 
       clearInterval(countRef.current)
+    // If the Complete key within the Tasks State Object is false and the Completed key is true the pause button is rendered and the timer is resumed
+    // The Completed key ensure this the code is not executed on the initial render
     } else if (tasks[keyID].complete === false && tasks[keyID].completed === true) {
       setPause(true)
       countRef.current = setInterval(() => {
@@ -496,7 +501,7 @@ const [initialStart, setInitialStart] = useState(true);
     }
   }, [tasks[keyID].complete])
 
-  // START TIMER
+  // handleStartTimer - Function - Start the initial timer
   const handleStartTimer = () => {
     countRef.current = setInterval(() => {
       setTimer((time) => time + 1)
@@ -505,16 +510,16 @@ const [initialStart, setInitialStart] = useState(true);
     setPause(true);
   }
 
-  // PAUSE TIMER
-  const handlePauseTimer = (event) => {
+  // handlePauseTimer - Function - Pause the timer
+  const handlePauseTimer = () => {
     setPause(!pause)
     setStart(!start)
 
     clearInterval(countRef.current)
   }
 
-  // RESUME TIMER
-  const handleResumeTimer = (event) => {
+  // handleResumeTimer - Function - Resume the timer, this is the play button which is shown after the initial start button has been clicked
+  const handleResumeTimer = () => {
     setPause(!pause)
     setStart(!start)
 
@@ -523,22 +528,32 @@ const [initialStart, setInitialStart] = useState(true);
     }, 1000)
   }
 
+  // formatTime - Function - Returns the hours, minutes and seconds based on the time state
   const formatTime = () => {
-    const getSeconds = `0${(time % 60)}`.slice(-2)
-    const minutes = `${Math.floor(time / 60)}`
-    const getMinutes = `0${minutes % 60}`.slice(-2)
+    const getSeconds = `0${(time % 60)}`.slice(-2);
+
+    const minutes = `${Math.floor(time / 60)}`;
+    const getMinutes = `0${minutes % 60}`.slice(-2);
+
     const getHours = `0${Math.floor(time / 3600)}`.slice(-2)
 
     return `${getHours} : ${getMinutes} : ${getSeconds}`
   }
 
+// ----------------------------------------------------------------------------------------------------------------------------------------
+// RETURN - JSX
+// ----------------------------------------------------------------------------------------------------------------------------------------
   return (
     <div className={styles.timerContainer}>
 
+      {/* formatTime Function which returns the hours, minutes and seconds of the time state */}
       <div id={`${'timer' + keyID}`} className={styles.time}>
         {formatTime()}
       </div>
 
+      {/* initialState - handleStartTimer - this button is initiates the timer and once clicked will not be shown again
+          start - handleResumeTimer - this button resumes the timer once it has been paused and displays the pause state button
+          pause - handlePauseTimer - this button pauses the timer and displays the start state button   */}
       {
         initialStart &&
         <svg id='play' xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="currentColor" onClick={handleStartTimer} className={`${'bi bi-play player-icon'} ${styles.biIcon}`} viewBox="0 0 16 16">
